@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "name": "bietalreef-v2",
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "regions": ["dxb1"],
+  "github": {
+    "silent": true
+  }
+}
