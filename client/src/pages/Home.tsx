@@ -42,7 +42,7 @@ export default function Home() {
                 <Button variant="outline" size="sm" onClick={() => logout()}>
                   تسجيل الخروج
                 </Button>
-              <>
+              </>
             ) : (
               <>
                 <Button variant="outline" size="sm" asChild>
