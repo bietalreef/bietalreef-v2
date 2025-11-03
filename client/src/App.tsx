@@ -11,6 +11,8 @@ import AreaCalculator from "./pages/tools/AreaCalculator";
 import MaterialSelector from "./pages/tools/MaterialSelector";
 import Properties from "./pages/Properties";
 import Craftsmen from "./pages/Craftsmen";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 
 function Router() {
   return (
@@ -22,6 +24,8 @@ function Router() {
       <Route path={"/tools/material-selector"} component={MaterialSelector} />
       <Route path={"/properties"} component={Properties} />
       <Route path={"/craftsmen"} component={Craftsmen} />
+      <Route path={"/login"} component={Login} />
+      <Route path={"/signup"} component={Signup} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

@@ -1,7 +1,8 @@
 import { useAuth } from "@/_core/hooks/useAuth";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { APP_LOGO, APP_TITLE, getLoginUrl } from "@/const";
+import { APP_LOGO, APP_TITLE, getLoginUrl, getSignupUrl } from "@/const";
 import { Building2, Calculator, FileText, Hammer, Home as HomeIcon, MessageSquare, Phone, Sparkles } from "lucide-react";
 
 export default function Home() {
@@ -49,7 +50,7 @@ export default function Home() {
                   <a href={getLoginUrl()}>تسجيل الدخول</a>
                 </Button>
                 <Button size="sm" asChild>
-                  <a href={getLoginUrl()}>إنشاء حساب</a>
+                  <a href={getSignupUrl()}>إنشاء حساب</a>
                 </Button>
               </>
             )}
