@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useLocation, Link } from 'wouter';
 import { authHelpers } from '../lib/supabase';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Alert, AlertDescription } from '../components/ui/alert';
 
 export default function Signup() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -65,7 +65,7 @@ export default function Signup() {
     if (data.user) {
       setSuccess(true);
       setTimeout(() => {
-        navigate('/login');
+        setLocation('/login');
       }, 2000);
     }
 

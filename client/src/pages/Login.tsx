@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useLocation, Link } from 'wouter';
 import { authHelpers } from '../lib/supabase';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Alert, AlertDescription } from '../components/ui/alert';
 
 export default function Login() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -29,7 +29,7 @@ export default function Login() {
     }
 
     if (data.user) {
-      navigate('/');
+      setLocation('/');
     }
 
     setLoading(false);
