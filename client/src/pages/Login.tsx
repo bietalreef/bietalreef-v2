@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useLocation, Link } from 'wouter';
+import ReCAPTCHA from 'react-google-recaptcha';
 import { authHelpers } from '../lib/supabase';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -12,11 +13,20 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    // Verify reCAPTCHA
+    const recaptchaValue = recaptchaRef.current?.getValue();
+    if (!recaptchaValue) {
+      setError('يرجى التحقق من أنك لست روبوت');
+      setLoading(false);
+      return;
+    }
 
     const { data, error: signInError } = await authHelpers.signIn(email, password);
 
@@ -25,15 +35,18 @@ export default function Login() {
         ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة' 
         : 'حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى.');
       setLoading(false);
+      recaptchaRef.current?.reset();
       return;
     }
 
     if (data.user) {
-      setLocation('/');
+      setLocation('/dashboard');
     }
 
     setLoading(false);
   };
+
+  const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'; // Test key
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4" dir="rtl">
@@ -83,6 +96,14 @@ export default function Login() {
                 required
                 disabled={loading}
                 className="text-right"
+              />
+            </div>
+
+            <div className="flex justify-center">
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={recaptchaSiteKey}
+                hl="ar"
               />
             </div>
 

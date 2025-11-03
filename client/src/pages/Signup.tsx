@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useLocation, Link } from 'wouter';
+import ReCAPTCHA from 'react-google-recaptcha';
 import { authHelpers } from '../lib/supabase';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -18,6 +19,7 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -32,16 +34,26 @@ export default function Signup() {
     setError('');
     setSuccess(false);
 
+    // Verify reCAPTCHA
+    const recaptchaValue = recaptchaRef.current?.getValue();
+    if (!recaptchaValue) {
+      setError('يرجى التحقق من أنك لست روبوت');
+      setLoading(false);
+      return;
+    }
+
     // Validation
     if (formData.password !== formData.confirmPassword) {
       setError('كلمة المرور وتأكيد كلمة المرور غير متطابقتين');
       setLoading(false);
+      recaptchaRef.current?.reset();
       return;
     }
 
     if (formData.password.length < 6) {
       setError('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
       setLoading(false);
+      recaptchaRef.current?.reset();
       return;
     }
 
@@ -59,6 +71,7 @@ export default function Signup() {
         ? 'هذا البريد الإلكتروني مسجل بالفعل' 
         : 'حدث خطأ أثناء التسجيل. يرجى المحاولة مرة أخرى.');
       setLoading(false);
+      recaptchaRef.current?.reset();
       return;
     }
 
@@ -71,6 +84,8 @@ export default function Signup() {
 
     setLoading(false);
   };
+
+  const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'; // Test key
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4" dir="rtl">
@@ -180,6 +195,14 @@ export default function Signup() {
                 required
                 disabled={loading}
                 className="text-right"
+              />
+            </div>
+
+            <div className="flex justify-center">
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={recaptchaSiteKey}
+                hl="ar"
               />
             </div>
 
