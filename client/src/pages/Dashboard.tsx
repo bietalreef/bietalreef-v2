@@ -47,7 +47,10 @@ export default function Dashboard() {
             <span className="text-lg font-bold">لوحة التحكم</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-muted-foreground">مرحباً، {user?.name}</span>
+            <div className="flex flex-col items-end">
+              <span className="text-sm font-medium">مرحباً، {user?.name}</span>
+              <span className="text-xs text-muted-foreground">ID: {user?.id?.substring(0, 8)}...</span>
+            </div>
             <Button variant="outline" size="sm" asChild>
               <Link href="/">الرئيسية</Link>
             </Button>
