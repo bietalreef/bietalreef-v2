@@ -36,10 +36,13 @@ export default function Home() {
             {isAuthenticated ? (
               <>
                 <span className="text-sm text-muted-foreground">مرحباً، {user?.name}</span>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/dashboard">لوحة التحكم</Link>
+                </Button>
                 <Button variant="outline" size="sm" onClick={() => logout()}>
                   تسجيل الخروج
                 </Button>
-              </>
+              <>
             ) : (
               <>
                 <Button variant="outline" size="sm" asChild>
