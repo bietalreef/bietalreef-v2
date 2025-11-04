@@ -157,6 +157,22 @@ export default function Login() {
             </Button>
           </div>
 
+          {/* Quick Login Link */}
+          <div className="mt-4">
+            <Link to="/quick-login">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full h-12 border-2 border-purple-500 text-purple-600 hover:bg-purple-50 font-medium transition-all duration-200 hover:scale-105 shadow-md flex items-center justify-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                تسجيل دخول سريع (إيميل أو هاتف)
+              </Button>
+            </Link>
+          </div>
+
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t border-gray-300" />

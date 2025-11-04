@@ -14,6 +14,7 @@ import Craftsmen from "./pages/Craftsmen";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import AuthCallback from "./pages/AuthCallback";
+import QuickLogin from "./pages/QuickLogin";
 
 function Router() {
   return (
@@ -28,6 +29,7 @@ function Router() {
       <Route path={"/login"} component={Login} />
       <Route path={"/signup"} component={Signup} />
       <Route path={"/auth/callback"} component={AuthCallback} />
+      <Route path={"/quick-login"} component={QuickLogin} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
