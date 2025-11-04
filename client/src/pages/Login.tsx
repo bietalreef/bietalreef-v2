@@ -22,12 +22,12 @@ export default function Login() {
       const accessToken = hashParams.get('access_token');
       const refreshToken = hashParams.get('refresh_token');
 
-      if (accessToken) {
+      if (accessToken && refreshToken) {
         try {
           // Set the session with the tokens from URL
           const { data, error } = await supabase.auth.setSession({
             access_token: accessToken,
-            refresh_token: refreshToken || '',
+            refresh_token: refreshToken,
           });
 
           if (error) {
@@ -37,10 +37,13 @@ export default function Login() {
           }
 
           if (data.session) {
+            console.log('Session set successfully:', data.session);
             // Clear the hash from URL
             window.history.replaceState(null, '', window.location.pathname);
             // Redirect to home page and reload to update auth state
-            window.location.href = '/';
+            setTimeout(() => {
+              window.location.href = '/';
+            }, 500);
           }
         } catch (err) {
           console.error('OAuth callback error:', err);
