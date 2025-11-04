@@ -34,7 +34,7 @@ export default function AuthCallback() {
             
             // Redirect to home page
             console.log('Redirecting to home...');
-            window.location.href = '/';
+            window.location.href = '/home';
           } else {
             console.log('No session after exchange, redirecting to login...');
             window.location.href = '/login?error=no_session';
@@ -54,7 +54,7 @@ export default function AuthCallback() {
           if (data.session) {
             console.log('Session found:', data.session.user.email);
             await new Promise(resolve => setTimeout(resolve, 500));
-            window.location.href = '/';
+            window.location.href = '/home';
           } else {
             console.log('No session found, redirecting to login...');
             window.location.href = '/login?error=no_session';

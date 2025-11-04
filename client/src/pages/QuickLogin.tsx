@@ -66,7 +66,7 @@ export default function QuickLogin() {
         
         if (data.session) {
           console.log('Session established:', data.session.user.email);
-          window.location.href = '/';
+          window.location.href = '/home';
         }
       } else {
         const { data, error: verifyError } = await supabase.auth.verifyOtp({
@@ -79,7 +79,7 @@ export default function QuickLogin() {
         
         if (data.session) {
           console.log('Session established:', data.session.user.phone);
-          window.location.href = '/';
+          window.location.href = '/home';
         }
       }
     } catch (err: any) {

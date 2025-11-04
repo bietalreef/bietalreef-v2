@@ -5,6 +5,7 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import HomeUser from "./pages/HomeUser";
 import Dashboard from "./pages/Dashboard";
 import CostCalculator from "./pages/tools/CostCalculator";
 import AreaCalculator from "./pages/tools/AreaCalculator";
@@ -20,6 +21,7 @@ function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/home"} component={HomeUser} />
       <Route path={"/dashboard"} component={Dashboard} />
       <Route path={"/tools/cost-calculator"} component={CostCalculator} />
       <Route path={"/tools/area-calculator"} component={AreaCalculator} />
