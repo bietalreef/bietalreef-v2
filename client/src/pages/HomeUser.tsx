@@ -128,17 +128,24 @@ const offers = [
 ];
 
 export default function HomeUser() {
-  const { user, isAuthenticated } = useAuth();
-  const isLoading = false;
+  const { user, isAuthenticated, loading } = useAuth();
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!loading && !isAuthenticated) {
       setLocation("/");
     }
-  }, [isAuthenticated, setLocation]);
+  }, [loading, isAuthenticated, setLocation]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated || !user) {
     return null;
