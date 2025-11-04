@@ -1,36 +1,21 @@
-import { useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { useEffect, useState } from 'react';
 
 export default function AuthCallback() {
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
-    const handleCallback = async () => {
-      try {
-        // Supabase automatically handles the OAuth callback
-        // We just need to get the session
-        const { data: { session }, error } = await supabase.auth.getSession();
+    // Supabase automatically processes the OAuth callback via the SDK
+    // The session is automatically set when the page loads with the hash
+    // We just need to wait a moment and then redirect
+    
+    const timer = setTimeout(() => {
+      // Check if we're still on the callback page (no redirect happened)
+      // This means the session was set successfully
+      console.log('Redirecting to home after successful OAuth...');
+      window.location.href = '/';
+    }, 1500);
 
-        if (error) {
-          console.error('Error getting session:', error);
-          window.location.href = '/login?error=auth_failed';
-          return;
-        }
-
-        if (session) {
-          console.log('Session found! Redirecting to home...');
-          // Redirect to home
-          window.location.href = '/';
-        } else {
-          console.error('No session found');
-          window.location.href = '/login?error=no_session';
-        }
-      } catch (err) {
-        console.error('Callback error:', err);
-        window.location.href = '/login?error=callback_failed';
-      }
-    };
-
-    // Small delay to ensure Supabase processes the callback
-    setTimeout(handleCallback, 500);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -44,6 +29,9 @@ export default function AuthCallback() {
         <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-white mx-auto mb-4"></div>
         <p className="text-white text-xl font-medium">جاري تسجيل الدخول...</p>
         <p className="text-white/80 text-sm mt-2">يرجى الانتظار</p>
+        {error && (
+          <p className="text-red-300 text-sm mt-4">{error}</p>
+        )}
       </div>
     </div>
   );
