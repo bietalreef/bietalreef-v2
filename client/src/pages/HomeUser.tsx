@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useUser } from "../hooks/use-user";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { useNavigate } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -128,26 +128,19 @@ const offers = [
 ];
 
 export default function HomeUser() {
-  const { user, isLoading } = useUser();
+  const { user, isAuthenticated } = useAuth();
+  const isLoading = false;
   const [, navigate] = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (!isAuthenticated) {
       navigate("/");
     }
-  }, [user, isLoading, navigate]);
+  }, [isAuthenticated, navigate]);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (!user) {
+  if (!isAuthenticated || !user) {
     return null;
   }
 
@@ -168,7 +161,7 @@ export default function HomeUser() {
               منصتك الشاملة للشركات والخدمات في الإمارات
             </p>
             <p className="text-lg text-gray-500">
-              مرحباً، {user.email}
+              مرحباً، {user?.email || user?.name || 'ضيف'}
             </p>
           </div>
 
