@@ -1,21 +1,45 @@
 import { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabase';
 
 export default function AuthCallback() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Supabase automatically processes the OAuth callback via the SDK
-    // The session is automatically set when the page loads with the hash
-    // We just need to wait a moment and then redirect
-    
-    const timer = setTimeout(() => {
-      // Check if we're still on the callback page (no redirect happened)
-      // This means the session was set successfully
-      console.log('Redirecting to home after successful OAuth...');
-      window.location.href = '/';
-    }, 1500);
+    const handleCallback = async () => {
+      try {
+        console.log('Processing OAuth callback...');
+        
+        // Get the session from the URL hash
+        const { data, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('Session error:', sessionError);
+          setError('فشل تسجيل الدخول. يرجى المحاولة مرة أخرى.');
+          setTimeout(() => window.location.href = '/login', 2000);
+          return;
+        }
 
-    return () => clearTimeout(timer);
+        if (data.session) {
+          console.log('Session established:', data.session.user.email);
+          
+          // Wait a moment to ensure session is fully persisted
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          // Redirect to home page
+          console.log('Redirecting to home...');
+          window.location.href = '/';
+        } else {
+          console.log('No session found, redirecting to login...');
+          window.location.href = '/login?error=no_session';
+        }
+      } catch (err) {
+        console.error('Callback error:', err);
+        setError('حدث خطأ أثناء تسجيل الدخول');
+        setTimeout(() => window.location.href = '/login', 2000);
+      }
+    };
+
+    handleCallback();
   }, []);
 
   return (
