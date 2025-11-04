@@ -5,7 +5,7 @@ export default function QuickLogin() {
   const [method, setMethod] = useState<'email' | 'phone'>('email');
   const [contact, setContact] = useState('');
   const [otp, setOtp] = useState('');
-  const [step, setStep] = useState<'input' | 'verify'>('input');
+  const [step, setStep] = useState<'input' | 'verify' | 'email-sent'>('input');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -26,8 +26,8 @@ export default function QuickLogin() {
 
         if (otpError) throw otpError;
         
-        setSuccess('تم إرسال رمز التأكيد إلى بريدك الإلكتروني!');
-        setStep('verify');
+        setSuccess('تم إرسال رابط التأكيد إلى بريدك الإلكتروني!');
+        setStep('email-sent');
       } else {
         // Phone OTP
         const { error: otpError } = await supabase.auth.signInWithOtp({
@@ -55,32 +55,17 @@ export default function QuickLogin() {
     setError('');
 
     try {
-      if (method === 'email') {
-        const { data, error: verifyError } = await supabase.auth.verifyOtp({
-          email: contact,
-          token: otp,
-          type: 'email',
-        });
+      const { data, error: verifyError } = await supabase.auth.verifyOtp({
+        phone: contact,
+        token: otp,
+        type: 'sms',
+      });
 
-        if (verifyError) throw verifyError;
-        
-        if (data.session) {
-          console.log('Session established:', data.session.user.email);
-          window.location.href = '/home';
-        }
-      } else {
-        const { data, error: verifyError } = await supabase.auth.verifyOtp({
-          phone: contact,
-          token: otp,
-          type: 'sms',
-        });
-
-        if (verifyError) throw verifyError;
-        
-        if (data.session) {
-          console.log('Session established:', data.session.user.phone);
-          window.location.href = '/home';
-        }
+      if (verifyError) throw verifyError;
+      
+      if (data.session) {
+        console.log('Session established:', data.session.user.phone);
+        window.location.href = '/home';
       }
     } catch (err: any) {
       console.error('Verify Error:', err);
@@ -154,18 +139,57 @@ export default function QuickLogin() {
               )}
             </div>
 
-            {/* Send OTP Button */}
+            {/* Send Button */}
             <button
               onClick={sendOTP}
               disabled={loading || !contact}
               className="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white py-3 px-4 rounded-lg font-medium hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'جاري الإرسال...' : 'إرسال رمز التأكيد'}
+              {loading ? 'جاري الإرسال...' : method === 'email' ? 'إرسال رابط التأكيد' : 'إرسال رمز التأكيد'}
             </button>
           </div>
         )}
 
-        {/* OTP Verification */}
+        {/* Email Sent - Wait for confirmation */}
+        {step === 'email-sent' && (
+          <div className="mb-6">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-green-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">تحقق من بريدك الإلكتروني</h3>
+              <p className="text-gray-600 mb-4">
+                تم إرسال رابط التأكيد إلى:
+              </p>
+              <p className="text-purple-600 font-medium mb-4">{contact}</p>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <p className="text-sm text-blue-800 text-right">
+                  📬 يرجى فتح بريدك الإلكتروني والضغط على <strong>رابط التأكيد</strong> لإكمال تسجيل الدخول
+                </p>
+              </div>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <p className="text-xs text-yellow-800 text-right">
+                  💡 لم تجد الرسالة؟ تحقق من مجلد البريد المزعج (Spam)
+                </p>
+              </div>
+            </div>
+
+            {/* Resend Button */}
+            <button
+              onClick={() => {
+                setStep('input');
+                setContact('');
+              }}
+              className="w-full text-purple-600 hover:text-purple-700 font-medium"
+            >
+              إعادة إرسال الرابط
+            </button>
+          </div>
+        )}
+
+        {/* Phone OTP Verification */}
         {step === 'verify' && (
           <div className="mb-6">
             <div className="mb-4">
@@ -182,7 +206,7 @@ export default function QuickLogin() {
                 dir="ltr"
               />
               <p className="text-xs text-gray-500 mt-1 text-center">
-                أدخل الرمز المكون من 6 أرقام
+                أدخل الرمز المكون من 6 أرقام المرسل إلى {contact}
               </p>
             </div>
 
