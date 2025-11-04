@@ -14,46 +14,55 @@ export default function Login() {
   const [error, setError] = useState('');
   const [oauthLoading, setOauthLoading] = useState(false);
 
-  // Handle OAuth callback on mount
+  // Handle OAuth callback on mount - SIMPLIFIED VERSION
   useEffect(() => {
-    // Check if we have OAuth tokens in URL hash
-    const handleOAuthCallback = async () => {
-      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const hash = window.location.hash;
+    
+    if (hash && hash.includes('access_token')) {
+      console.log('OAuth callback detected!');
+      setOauthLoading(true);
+      
+      const hashParams = new URLSearchParams(hash.substring(1));
       const accessToken = hashParams.get('access_token');
       const refreshToken = hashParams.get('refresh_token');
+      
+      console.log('Tokens found:', { 
+        hasAccessToken: !!accessToken, 
+        hasRefreshToken: !!refreshToken 
+      });
 
       if (accessToken && refreshToken) {
-        try {
-          // Set the session with the tokens from URL
-          const { data, error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          });
-
+        supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        }).then(({ data, error }) => {
           if (error) {
             console.error('Error setting session:', error);
             setError('حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى.');
+            setOauthLoading(false);
             return;
           }
 
           if (data.session) {
-            console.log('Session set successfully:', data.session);
-            // Clear the hash from URL
-            window.history.replaceState(null, '', window.location.pathname);
-            // Redirect to home page and reload to update auth state
-            setTimeout(() => {
-              window.location.href = '/';
-            }, 500);
+            console.log('Session set successfully! Redirecting...');
+            // Clear hash and redirect
+            window.history.replaceState(null, '', '/login');
+            window.location.href = '/';
+          } else {
+            console.error('No session in response');
+            setOauthLoading(false);
           }
-        } catch (err) {
+        }).catch(err => {
           console.error('OAuth callback error:', err);
           setError('حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى.');
-        }
+          setOauthLoading(false);
+        });
+      } else {
+        console.error('Missing tokens');
+        setOauthLoading(false);
       }
-    };
-
-    handleOAuthCallback();
-  }, [setLocation]);
+    }
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,6 +116,29 @@ export default function Login() {
       setOauthLoading(false);
     }
   };
+
+  // Show loading screen during OAuth callback
+  if (oauthLoading && window.location.hash.includes('access_token')) {
+    return (
+      <div 
+        className="min-h-screen flex items-center justify-center p-4"
+        dir="rtl"
+        style={{
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%)',
+        }}
+      >
+        <Card className="w-full max-w-md backdrop-blur-xl bg-white/95 shadow-2xl border-0">
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mb-4"></div>
+              <p className="text-lg font-medium text-gray-700">جاري تسجيل الدخول...</p>
+              <p className="text-sm text-gray-500 mt-2">يرجى الانتظار</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div 
