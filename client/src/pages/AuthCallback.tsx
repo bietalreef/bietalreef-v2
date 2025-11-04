@@ -9,28 +9,56 @@ export default function AuthCallback() {
       try {
         console.log('Processing OAuth callback...');
         
-        // Get the session from the URL hash
-        const { data, error: sessionError } = await supabase.auth.getSession();
+        // Check if we have a code in the URL (OAuth callback)
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
         
-        if (sessionError) {
-          console.error('Session error:', sessionError);
-          setError('فشل تسجيل الدخول. يرجى المحاولة مرة أخرى.');
-          setTimeout(() => window.location.href = '/login', 2000);
-          return;
-        }
+        if (code) {
+          console.log('Found OAuth code, exchanging for session...');
+          
+          // Exchange the code for a session
+          const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+          
+          if (exchangeError) {
+            console.error('Exchange error:', exchangeError);
+            setError('فشل تسجيل الدخول. يرجى المحاولة مرة أخرى.');
+            setTimeout(() => window.location.href = '/login', 2000);
+            return;
+          }
 
-        if (data.session) {
-          console.log('Session established:', data.session.user.email);
-          
-          // Wait a moment to ensure session is fully persisted
-          await new Promise(resolve => setTimeout(resolve, 500));
-          
-          // Redirect to home page
-          console.log('Redirecting to home...');
-          window.location.href = '/';
+          if (data.session) {
+            console.log('Session established successfully:', data.session.user.email);
+            
+            // Wait a moment to ensure session is fully persisted
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Redirect to home page
+            console.log('Redirecting to home...');
+            window.location.href = '/';
+          } else {
+            console.log('No session after exchange, redirecting to login...');
+            window.location.href = '/login?error=no_session';
+          }
         } else {
-          console.log('No session found, redirecting to login...');
-          window.location.href = '/login?error=no_session';
+          // Fallback: try to get existing session from hash
+          console.log('No code found, checking for existing session...');
+          const { data, error: sessionError } = await supabase.auth.getSession();
+          
+          if (sessionError) {
+            console.error('Session error:', sessionError);
+            setError('فشل تسجيل الدخول. يرجى المحاولة مرة أخرى.');
+            setTimeout(() => window.location.href = '/login', 2000);
+            return;
+          }
+
+          if (data.session) {
+            console.log('Session found:', data.session.user.email);
+            await new Promise(resolve => setTimeout(resolve, 500));
+            window.location.href = '/';
+          } else {
+            console.log('No session found, redirecting to login...');
+            window.location.href = '/login?error=no_session';
+          }
         }
       } catch (err) {
         console.error('Callback error:', err);
