@@ -13,6 +13,7 @@ import Properties from "./pages/Properties";
 import Craftsmen from "./pages/Craftsmen";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import AuthCallback from "./pages/AuthCallback";
 
 function Router() {
   return (
@@ -26,6 +27,7 @@ function Router() {
       <Route path={"/craftsmen"} component={Craftsmen} />
       <Route path={"/login"} component={Login} />
       <Route path={"/signup"} component={Signup} />
+      <Route path={"/auth/callback"} component={AuthCallback} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
