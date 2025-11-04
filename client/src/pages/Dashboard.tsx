@@ -12,7 +12,9 @@ import {
   MessageSquare, 
   Settings,
   Users,
-  Wrench
+  Wrench,
+  ShoppingCart,
+  Package
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -65,10 +67,18 @@ export default function Dashboard() {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-7">
             <TabsTrigger value="overview">
               <LayoutDashboard className="ml-2 h-4 w-4" />
               نظرة عامة
+            </TabsTrigger>
+            <TabsTrigger value="cart">
+              <ShoppingCart className="ml-2 h-4 w-4" />
+              السلة
+            </TabsTrigger>
+            <TabsTrigger value="orders">
+              <Package className="ml-2 h-4 w-4" />
+              الطلبات
             </TabsTrigger>
             <TabsTrigger value="tools">
               <Calculator className="ml-2 h-4 w-4" />
@@ -191,6 +201,50 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* السلة */}
+          <TabsContent value="cart">
+            <Card>
+              <CardHeader>
+                <CardTitle>سلة التسوق</CardTitle>
+                <CardDescription>إدارة عناصر سلتك</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="text-center py-12">
+                    <ShoppingCart className="mx-auto h-24 w-24 text-gray-400" />
+                    <h3 className="mt-4 text-lg font-medium text-gray-900">السلة فارغة</h3>
+                    <p className="mt-2 text-sm text-gray-500">ابدأ بإضافة عقارات إلى سلتك</p>
+                    <Button className="mt-4" asChild>
+                      <Link href="/properties">تصفح العقارات</Link>
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* الطلبات */}
+          <TabsContent value="orders">
+            <Card>
+              <CardHeader>
+                <CardTitle>طلباتي</CardTitle>
+                <CardDescription>تتبع حالة طلباتك</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="text-center py-12">
+                    <Package className="mx-auto h-24 w-24 text-gray-400" />
+                    <h3 className="mt-4 text-lg font-medium text-gray-900">لا توجد طلبات بعد</h3>
+                    <p className="mt-2 text-sm text-gray-500">ستظهر طلباتك هنا بعد إتمام عملية الشراء</p>
+                    <Button className="mt-4" asChild>
+                      <Link href="/properties">ابدأ التسوق</Link>
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* الأدوات */}

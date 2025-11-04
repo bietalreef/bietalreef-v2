@@ -39,8 +39,8 @@ export default function Login() {
           if (data.session) {
             // Clear the hash from URL
             window.history.replaceState(null, '', window.location.pathname);
-            // Redirect to dashboard and reload to update auth state
-            window.location.href = '/dashboard';
+            // Redirect to home page and reload to update auth state
+            window.location.href = '/';
           }
         } catch (err) {
           console.error('OAuth callback error:', err);
