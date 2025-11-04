@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { useNavigate } from "wouter";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -130,15 +130,15 @@ const offers = [
 export default function HomeUser() {
   const { user, isAuthenticated } = useAuth();
   const isLoading = false;
-  const [, navigate] = useNavigate();
+  const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate("/");
+      setLocation("/");
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, setLocation]);
 
   if (!isAuthenticated || !user) {
     return null;
