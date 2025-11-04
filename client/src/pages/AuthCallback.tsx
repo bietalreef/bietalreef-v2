@@ -5,43 +5,22 @@ export default function AuthCallback() {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // Get the hash from URL
-        const hash = window.location.hash;
-        
-        if (!hash) {
-          console.error('No hash in URL');
-          window.location.href = '/login';
-          return;
-        }
-
-        const hashParams = new URLSearchParams(hash.substring(1));
-        const accessToken = hashParams.get('access_token');
-        const refreshToken = hashParams.get('refresh_token');
-
-        if (!accessToken || !refreshToken) {
-          console.error('Missing tokens');
-          window.location.href = '/login';
-          return;
-        }
-
-        // Set the session
-        const { data, error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        });
+        // Supabase automatically handles the OAuth callback
+        // We just need to get the session
+        const { data: { session }, error } = await supabase.auth.getSession();
 
         if (error) {
-          console.error('Error setting session:', error);
+          console.error('Error getting session:', error);
           window.location.href = '/login?error=auth_failed';
           return;
         }
 
-        if (data.session) {
-          console.log('Session set successfully!');
+        if (session) {
+          console.log('Session found! Redirecting to home...');
           // Redirect to home
           window.location.href = '/';
         } else {
-          console.error('No session in response');
+          console.error('No session found');
           window.location.href = '/login?error=no_session';
         }
       } catch (err) {
@@ -50,7 +29,8 @@ export default function AuthCallback() {
       }
     };
 
-    handleCallback();
+    // Small delay to ensure Supabase processes the callback
+    setTimeout(handleCallback, 500);
   }, []);
 
   return (
