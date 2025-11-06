@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useProfile } from "@/hooks/useProfile";
+import BottomNav from "@/components/BottomNav";
 import { 
   Building2, 
   Wrench, 
@@ -669,8 +670,10 @@ export default function HomeUser() {
   }
 
   // Render different views based on user type from database
-  return profile.user_type === 'client' ? (
-    <ClientView 
+  return (
+    <>
+      {profile.user_type === 'client' ? (
+        <ClientView 
       user={user}
       profile={profile}
       searchQuery={searchQuery}
@@ -678,7 +681,10 @@ export default function HomeUser() {
       selectedCategory={selectedCategory}
       setSelectedCategory={setSelectedCategory}
     />
-  ) : (
-    <ProviderView user={user} profile={profile} />
+      ) : (
+        <ProviderView user={user} profile={profile} />
+      )}
+      <BottomNav />
+    </>
   );
 }

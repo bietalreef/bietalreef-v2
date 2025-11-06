@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { useProfile } from "@/hooks/useProfile";
+import BottomNav from "@/components/BottomNav";
 import { 
   Building2, 
   Calculator, 
@@ -824,6 +825,7 @@ export default function Dashboard() {
           )}
         </Tabs>
       </div>
+      <BottomNav />
     </div>
   );
 }

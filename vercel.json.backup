@@ -8,19 +8,6 @@
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ],
-  "redirects": [
-    {
-      "source": "/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "(?!bietalreef\\.ae$|www\\.bietalreef\\.ae$).*"
-        }
-      ],
-      "destination": "https://bietalreef.ae/:path*",
-      "permanent": true
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",

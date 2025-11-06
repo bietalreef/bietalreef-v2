@@ -125,6 +125,22 @@ export default function Login() {
               <Link to="/signup" className="text-[#C5A572] font-medium">إنشاء حساب جديد</Link>
             </div>
           </form>
+
+          {/* Terms and Privacy Links */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <p className="text-center text-xs text-gray-500 mb-2">
+              بتسجيل الدخول، أنت توافق على:
+            </p>
+            <div className="flex items-center justify-center gap-3 text-xs">
+              <Link to="/terms" className="text-[#4C6A3E] hover:text-[#3f5b33] font-medium hover:underline">
+                الشروط والأحكام
+              </Link>
+              <span className="text-gray-400">•</span>
+              <Link to="/privacy" className="text-[#4C6A3E] hover:text-[#3f5b33] font-medium hover:underline">
+                سياسة الخصوصية
+              </Link>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
