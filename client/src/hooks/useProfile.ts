@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 export interface UserProfile {
   id: string;
   user_type: 'client' | 'provider' | null;
+  provider_subtype: 'company' | 'craftsman' | null;
   phone: string | null;
   location: string | null;
   verification_status: 'unverified' | 'pending' | 'verified' | 'rejected';

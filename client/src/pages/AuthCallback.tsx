@@ -104,18 +104,25 @@ export default function AuthCallback() {
     handleCallback();
   }, [setLocation]);
 
-  const handleUserTypeSelect = async (type: 'client' | 'provider') => {
+  const handleUserTypeSelect = async (type: 'client' | 'provider', providerSubtype?: 'company' | 'craftsman') => {
     if (!userId) return;
 
     try {
-      // Save user type to database
+      // Save user type and provider subtype to database
+      const updateData: any = {
+        id: userId,
+        user_type: type,
+        updated_at: new Date().toISOString(),
+      };
+
+      // Add provider_subtype if it's a provider
+      if (type === 'provider' && providerSubtype) {
+        updateData.provider_subtype = providerSubtype;
+      }
+
       const { error } = await supabase
         .from('profiles')
-        .upsert({
-          id: userId,
-          user_type: type,
-          updated_at: new Date().toISOString(),
-        });
+        .upsert(updateData);
 
       if (error) {
         console.error('Error saving user type:', error);
