@@ -54,7 +54,7 @@ export default function Login() {
       <Card className="w-full max-w-md backdrop-blur-xl bg-white/95 shadow-2xl border-0 relative z-10">
         <CardHeader className="space-y-1 text-center pb-6">
           <div className="flex justify-center mb-4">
-            <img src="/client/public/logo.png" alt="بيت الريف" style={{ height: 72 }} />
+            <img src="/logo.png" alt="بيت الريف" style={{ height: 72 }} />
           </div>
           <CardTitle className="text-3xl font-bold text-[#4C6A3E]">
             تسجيل الدخول إلى بيت الريف
