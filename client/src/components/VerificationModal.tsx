@@ -3,46 +3,71 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Shield, Upload, Phone, MapPin, FileText, X } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useProfile } from "@/hooks/useProfile";
+import { Shield, Upload, Phone, MapPin, FileText, X, Loader2, AlertCircle, CheckCircle } from "lucide-react";
 
 interface VerificationModalProps {
   open: boolean;
-  userType: 'client' | 'provider';
-  onSkip: () => void;
-  onSubmit: (data: VerificationData) => void;
+  onOpenChange: (open: boolean) => void;
+  onComplete?: () => void;
 }
 
-export interface VerificationData {
-  phone: string;
-  location: string;
-  idDocument?: File;
-  businessLicense?: File;
-}
-
-export default function VerificationModal({ open, userType, onSkip, onSubmit }: VerificationModalProps) {
-  const [phone, setPhone] = useState("");
-  const [location, setLocation] = useState("");
+export default function VerificationModal({ open, onOpenChange, onComplete }: VerificationModalProps) {
+  const { profile, uploadVerificationDocument, updateProfile } = useProfile();
+  const [phone, setPhone] = useState(profile?.phone || "");
+  const [location, setLocation] = useState(profile?.location || "");
   const [idDocument, setIdDocument] = useState<File | null>(null);
   const [businessLicense, setBusinessLicense] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
-  const handleSubmit = () => {
-    const data: VerificationData = {
-      phone,
-      location,
-      idDocument: idDocument || undefined,
-      businessLicense: businessLicense || undefined,
-    };
-    onSubmit(data);
+  const isProvider = profile?.user_type === 'provider';
+
+  const handleSubmit = async () => {
+    setError(null);
+    setUploading(true);
+
+    try {
+      // Update phone and location
+      await updateProfile({ phone, location });
+
+      // Upload ID document if provided
+      if (idDocument) {
+        await uploadVerificationDocument(idDocument, 'id_photo');
+      }
+
+      // Upload business license if provided (for providers)
+      if (businessLicense && isProvider) {
+        await uploadVerificationDocument(businessLicense, 'business_license');
+      }
+
+      setSuccess(true);
+      setTimeout(() => {
+        onComplete?.();
+        onOpenChange(false);
+      }, 2000);
+    } catch (err) {
+      console.error("Error submitting verification:", err);
+      setError("حدث خطأ أثناء إرسال البيانات. يرجى المحاولة مرة أخرى.");
+    } finally {
+      setUploading(false);
+    }
   };
 
-  const isProvider = userType === 'provider';
+  const handleSkip = () => {
+    onOpenChange(false);
+    onComplete?.();
+  };
 
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-xl">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-xl" dir="rtl">
         <button
-          onClick={onSkip}
+          onClick={handleSkip}
           className="absolute left-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
+          disabled={uploading}
         >
           <X className="h-4 w-4" />
           <span className="sr-only">إغلاق</span>
@@ -62,7 +87,24 @@ export default function VerificationModal({ open, userType, onSkip, onSubmit }: 
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        {success ? (
+          <div className="py-8 text-center">
+            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            <h3 className="text-xl font-bold mb-2">تم الإرسال بنجاح!</h3>
+            <p className="text-gray-600">
+              سيتم مراجعة مستنداتك خلال 24-48 ساعة
+            </p>
+          </div>
+        ) : (
+          <>
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            <div className="space-y-4 py-4">
           {/* رقم الهاتف */}
           <div className="space-y-2">
             <Label htmlFor="phone" className="flex items-center gap-2">
@@ -163,26 +205,36 @@ export default function VerificationModal({ open, userType, onSkip, onSubmit }: 
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button
-            variant="outline"
-            onClick={onSkip}
-            className="flex-1"
-          >
-            سأوثق لاحقاً
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={!phone || !location}
-            className="flex-1"
-          >
-            إرسال طلب التوثيق
-          </Button>
-        </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                variant="outline"
+                onClick={handleSkip}
+                className="flex-1"
+                disabled={uploading}
+              >
+                سأوثق لاحقاً
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                disabled={!phone || !location || uploading}
+                className="flex-1"
+              >
+                {uploading ? (
+                  <>
+                    <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                    جارٍ الإرسال...
+                  </>
+                ) : (
+                  "إرسال طلب التوثيق"
+                )}
+              </Button>
+            </div>
 
-        <p className="text-xs text-center text-muted-foreground">
-          يمكنك توثيق حسابك لاحقاً من الإعدادات
-        </p>
+            <p className="text-xs text-center text-muted-foreground">
+              يمكنك توثيق حسابك لاحقاً من الإعدادات
+            </p>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
