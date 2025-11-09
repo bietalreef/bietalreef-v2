@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { APP_LOGO, APP_TITLE, getLoginUrl, getSignupUrl } from "@/const";
 import { Building2, Calculator, FileText, Hammer, Home as HomeIcon, MessageSquare, Phone, Sparkles } from "lucide-react";
+import Footer from "@/components/Footer";
 
 export default function Home() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -385,6 +386,9 @@ export default function Home() {
           <MessageSquare className="h-6 w-6" />
         </Button>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
