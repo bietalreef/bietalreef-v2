@@ -1,44 +1,97 @@
 import { useState } from 'react';
 import { useLocation, Link } from 'wouter';
-import { authHelpers } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Alert, AlertDescription } from '../components/ui/alert';
+import { Mail, LogIn } from 'lucide-react';
 
 export default function Login() {
   const [, setLocation] = useLocation();
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [otp, setOtp] = useState('');
+  const [step, setStep] = useState<'email' | 'otp'>('email');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [oauthLoading, setOauthLoading] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    const { data, error: signInError } = await authHelpers.signIn(email, password);
-    if (signInError) {
-      setError(signInError.message === 'Invalid login credentials'
-        ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة'
-        : 'حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى.');
-      setLoading(false);
-      return;
-    }
-    if (data.user) {
-      setLocation('/dashboard');
-    }
-    setLoading(false);
-  };
-
   const handleGoogleSignIn = async () => {
-    setOauthLoading(true);
-    setError('');
-    const { error: signInError } = await authHelpers.signInWithGoogle();
-    if (signInError) {
+    try {
+      setOauthLoading(true);
+      setError('');
+      
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) throw error;
+    } catch (err: any) {
       setError('حدث خطأ أثناء تسجيل الدخول بواسطة Google. يرجى المحاولة مرة أخرى.');
       setOauthLoading(false);
+    }
+  };
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email) {
+      setError('الرجاء إدخال البريد الإلكتروني');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError('');
+
+      // Send OTP to email
+      const { error } = await supabase.auth.signInWithOtp({
+        email: email,
+        options: {
+          shouldCreateUser: true,
+        },
+      });
+
+      if (error) throw error;
+
+      setStep('otp');
+      setError('');
+    } catch (err: any) {
+      setError(err.message || 'حدث خطأ أثناء إرسال رمز التحقق');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOtpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!otp || otp.length !== 6) {
+      setError('الرجاء إدخال رمز التحقق المكون من 6 أرقام');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError('');
+
+      const { error } = await supabase.auth.verifyOtp({
+        email: email,
+        token: otp,
+        type: 'email',
+      });
+
+      if (error) throw error;
+
+      // Redirect to callback which will handle UserTypeModal
+      setLocation('/auth/callback');
+    } catch (err: any) {
+      setError(err.message || 'رمز التحقق غير صحيح');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -71,6 +124,7 @@ export default function Login() {
             </Alert>
           )}
 
+          {/* Google Login */}
           <div className="space-y-3 mb-6">
             <Button
               type="button"
@@ -97,31 +151,91 @@ export default function Login() {
             </div>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium text-gray-700">البريد الإلكتروني</label>
-              <Input id="email" type="email" placeholder="example@email.com"
-                value={email} onChange={(e) => setEmail(e.target.value)}
-                required disabled={loading || oauthLoading} className="text-right h-12" />
-            </div>
+          {/* Email OTP Form */}
+          {step === 'email' ? (
+            <form onSubmit={handleEmailSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="email" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  البريد الإلكتروني
+                </label>
+                <Input 
+                  id="email" 
+                  type="email" 
+                  placeholder="example@email.com"
+                  value={email} 
+                  onChange={(e) => setEmail(e.target.value)}
+                  required 
+                  disabled={loading || oauthLoading} 
+                  className="text-right h-12" 
+                />
+              </div>
 
-            <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium text-gray-700">كلمة المرور</label>
-              <Input id="password" type="password" placeholder="••••••••"
-                value={password} onChange={(e) => setPassword(e.target.value)}
-                required disabled={loading || oauthLoading} className="text-right h-12" />
-            </div>
+              <Button 
+                type="submit" 
+                className="w-full h-12 text-base font-medium bg-[#4C6A3E] hover:bg-[#3f5b33] text-white shadow-lg flex items-center justify-center gap-2"
+                disabled={loading || oauthLoading}
+              >
+                <LogIn className="w-5 h-5" />
+                {loading ? 'جارٍ الإرسال...' : 'إرسال رمز التحقق'}
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleOtpSubmit} className="space-y-4">
+              <div className="text-center mb-4 p-3 bg-green-50 rounded-lg">
+                <p className="text-gray-700 text-sm mb-1">
+                  تم إرسال رمز التحقق إلى
+                </p>
+                <p className="font-semibold text-gray-900">{email}</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep('email');
+                    setOtp('');
+                    setError('');
+                  }}
+                  className="text-[#4C6A3E] text-sm mt-2 hover:underline font-medium"
+                >
+                  تغيير البريد الإلكتروني
+                </button>
+              </div>
 
-            <Button type="submit" className="w-full h-12 text-base font-medium bg-[#4C6A3E] hover:bg-[#3f5b33] text-white shadow-lg"
-              disabled={loading || oauthLoading}>
-              {loading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
-            </Button>
+              <div className="space-y-2">
+                <label htmlFor="otp" className="text-sm font-medium text-gray-700">
+                  رمز التحقق (6 أرقام)
+                </label>
+                <Input
+                  id="otp"
+                  type="text"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="123456"
+                  className="text-center text-2xl tracking-widest font-mono h-14"
+                  required
+                  disabled={loading}
+                  maxLength={6}
+                />
+              </div>
 
-            <div className="text-center text-sm text-gray-600">
-              ليس لديك حساب؟{' '}
-              <Link to="/signup" className="text-[#C5A572] font-medium">إنشاء حساب جديد</Link>
-            </div>
-          </form>
+              <Button 
+                type="submit" 
+                className="w-full h-12 text-base font-medium bg-[#4C6A3E] hover:bg-[#3f5b33] text-white shadow-lg flex items-center justify-center gap-2"
+                disabled={loading || otp.length !== 6}
+              >
+                <LogIn className="w-5 h-5" />
+                {loading ? 'جارٍ التحقق...' : 'تسجيل الدخول'}
+              </Button>
+
+              <button
+                type="button"
+                onClick={handleEmailSubmit}
+                disabled={loading}
+                className="w-full text-[#4C6A3E] text-sm hover:underline disabled:opacity-50 font-medium"
+              >
+                إعادة إرسال رمز التحقق
+              </button>
+            </form>
+          )}
 
           {/* Terms and Privacy Links */}
           <div className="mt-6 pt-6 border-t border-gray-200">
