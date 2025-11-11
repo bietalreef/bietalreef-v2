@@ -6,7 +6,7 @@
   "framework": "vite",
   "outputDirectory": "dist/public",
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/((?!assets/).*)", "destination": "/index.html" }
   ],
   "redirects": [
     {
