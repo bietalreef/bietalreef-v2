@@ -1,10 +1,7 @@
 import { useState } from 'react';
 import { useLocation, Link } from 'wouter';
 import { supabase } from '../lib/supabase';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Alert, AlertDescription } from '../components/ui/alert';
+import { ArchitecturalBackground } from '../components/ArchitecturalBackground';
 import { Mail, LogIn } from 'lucide-react';
 
 export default function Login() {
@@ -47,7 +44,6 @@ export default function Login() {
       setLoading(true);
       setError('');
 
-      // Send OTP to email
       const { error } = await supabase.auth.signInWithOtp({
         email: email,
         options: {
@@ -86,7 +82,6 @@ export default function Login() {
 
       if (error) throw error;
 
-      // Redirect to callback which will handle UserTypeModal
       setLocation('/auth/callback');
     } catch (err: any) {
       setError(err.message || 'رمز التحقق غير صحيح');
@@ -96,164 +91,187 @@ export default function Login() {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-      dir="rtl"
-      style={{
-        fontFamily: "'Noto Kufi Arabic', sans-serif",
-        background: 'linear-gradient(180deg,#FAF9F7 0%,#ECE7DE 100%)',
-      }}
-    >
-      <Card className="w-full max-w-md backdrop-blur-xl bg-white/95 shadow-2xl border-0 relative z-10">
-        <CardHeader className="space-y-1 text-center pb-6">
-          <div className="flex justify-center mb-4">
-            <img src="/logo.png" alt="بيت الريف" style={{ height: 72 }} />
+    <div className="relative w-full min-h-screen overflow-hidden" dir="rtl">
+      <ArchitecturalBackground />
+      
+      <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
+        <div className="w-full max-w-md">
+          {/* Logo and Title Card */}
+          <div className="mb-8 text-center">
+            <div className="inline-flex items-center justify-center w-24 h-24 mb-6 rounded-3xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-2xl shadow-emerald-500/30">
+              <img 
+                src="/logo.png" 
+                alt="بيت الريف" 
+                className="w-16 h-16 object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.parentElement!.innerHTML = '<span class="text-4xl text-white">🏡</span>';
+                }}
+              />
+            </div>
+            <h1 className="text-3xl font-bold text-[#8B7355] mb-2">
+              تسجيل الدخول إلى بيت الريف
+            </h1>
+            <p className="text-[#A0826D]">
+              منصة الملاك الذكية في الإمارات
+            </p>
           </div>
-          <CardTitle className="text-3xl font-bold text-[#4C6A3E]">
-            تسجيل الدخول إلى بيت الريف
-          </CardTitle>
-          <CardDescription className="text-gray-600 text-base">
-            سجّل دخولك للوصول إلى حسابك في بيت الريف
-          </CardDescription>
-        </CardHeader>
 
-        <CardContent>
-          {error && (
-            <Alert variant="destructive" className="mb-4 animate-shake">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+          {/* Main Card */}
+          <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/50">
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-600 text-sm text-center animate-shake">
+                {error}
+              </div>
+            )}
 
-          {/* Google Login */}
-          <div className="space-y-3 mb-6">
-            <Button
-              type="button"
+            {/* Google Login Button */}
+            <button
               onClick={handleGoogleSignIn}
               disabled={loading || oauthLoading}
-              className="w-full h-12 bg-[#4C6A3E] hover:bg-[#3f5b33] text-white font-medium transition-all duration-200 hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+              className="w-full h-14 bg-white border-2 border-gray-200 hover:border-emerald-500 text-gray-700 rounded-2xl font-semibold transition-all duration-300 flex items-center justify-center gap-3 mb-6 shadow-lg hover:shadow-xl hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
-                <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-              </svg>
-              تسجيل الدخول بواسطة Google
-            </Button>
-          </div>
-
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-gray-300" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">أو</span>
-            </div>
-          </div>
-
-          {/* Email OTP Form */}
-          {step === 'email' ? (
-            <form onSubmit={handleEmailSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <Mail className="w-4 h-4" />
-                  البريد الإلكتروني
-                </label>
-                <Input 
-                  id="email" 
-                  type="email" 
-                  placeholder="example@email.com"
-                  value={email} 
-                  onChange={(e) => setEmail(e.target.value)}
-                  required 
-                  disabled={loading || oauthLoading} 
-                  className="text-right h-12" 
+              <svg className="w-6 h-6" viewBox="0 0 24 24">
+                <path
+                  fill="#4285F4"
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                 />
-              </div>
+                <path
+                  fill="#34A853"
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                />
+              </svg>
+              <span>متابعة عبر جوجل</span>
+            </button>
 
-              <Button 
-                type="submit" 
-                className="w-full h-12 text-base font-medium bg-[#4C6A3E] hover:bg-[#3f5b33] text-white shadow-lg flex items-center justify-center gap-2"
-                disabled={loading || oauthLoading}
-              >
-                <LogIn className="w-5 h-5" />
-                {loading ? 'جارٍ الإرسال...' : 'إرسال رمز التحقق'}
-              </Button>
-            </form>
-          ) : (
-            <form onSubmit={handleOtpSubmit} className="space-y-4">
-              <div className="text-center mb-4 p-3 bg-green-50 rounded-lg">
-                <p className="text-gray-700 text-sm mb-1">
-                  تم إرسال رمز التحقق إلى
-                </p>
-                <p className="font-semibold text-gray-900">{email}</p>
+            {/* Divider */}
+            <div className="relative my-8">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t-2 border-gray-200"></div>
+              </div>
+              <div className="relative flex justify-center">
+                <span className="px-4 bg-white text-gray-500 text-sm font-medium">أو</span>
+              </div>
+            </div>
+
+            {/* Email OTP Form */}
+            {step === 'email' ? (
+              <form onSubmit={handleEmailSubmit} className="space-y-6">
+                <div>
+                  <label className="block text-[#8B7355] font-semibold mb-3 text-right">
+                    البريد الإلكتروني
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="example@email.com"
+                      className="w-full h-14 pl-12 pr-4 border-2 border-gray-200 rounded-2xl focus:border-emerald-500 focus:outline-none transition-all duration-300 text-right bg-gray-50 focus:bg-white"
+                      required
+                      disabled={loading || oauthLoading}
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading || oauthLoading}
+                  className="w-full h-14 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white rounded-2xl font-bold transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                >
+                  <LogIn className="w-5 h-5" />
+                  <span>{loading ? 'جارٍ الإرسال...' : '← إرسال رمز التحقق'}</span>
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleOtpSubmit} className="space-y-6">
+                <div className="text-center mb-6 p-4 bg-emerald-50 rounded-2xl border border-emerald-200">
+                  <p className="text-gray-700 text-sm mb-1">
+                    تم إرسال رمز التحقق إلى
+                  </p>
+                  <p className="font-bold text-gray-900">{email}</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStep('email');
+                      setOtp('');
+                      setError('');
+                    }}
+                    className="text-emerald-600 text-sm mt-2 hover:underline font-semibold"
+                  >
+                    تغيير البريد الإلكتروني
+                  </button>
+                </div>
+
+                <div>
+                  <label className="block text-[#8B7355] font-semibold mb-3 text-center">
+                    رمز التحقق (6 أرقام)
+                  </label>
+                  <input
+                    type="text"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="123456"
+                    className="w-full h-16 px-4 border-2 border-gray-200 rounded-2xl focus:border-emerald-500 focus:outline-none text-center text-3xl tracking-[1em] font-bold bg-gray-50 focus:bg-white transition-all duration-300"
+                    required
+                    disabled={loading}
+                    maxLength={6}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading || otp.length !== 6}
+                  className="w-full h-14 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white rounded-2xl font-bold transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                >
+                  <LogIn className="w-5 h-5" />
+                  <span>{loading ? 'جارٍ التحقق...' : 'تسجيل الدخول'}</span>
+                </button>
+
                 <button
                   type="button"
-                  onClick={() => {
-                    setStep('email');
-                    setOtp('');
-                    setError('');
-                  }}
-                  className="text-[#4C6A3E] text-sm mt-2 hover:underline font-medium"
-                >
-                  تغيير البريد الإلكتروني
-                </button>
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="otp" className="text-sm font-medium text-gray-700">
-                  رمز التحقق (6 أرقام)
-                </label>
-                <Input
-                  id="otp"
-                  type="text"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="123456"
-                  className="text-center text-2xl tracking-widest font-mono h-14"
-                  required
+                  onClick={handleEmailSubmit}
                   disabled={loading}
-                  maxLength={6}
-                />
+                  className="w-full text-emerald-600 text-sm hover:underline disabled:opacity-50 font-semibold"
+                >
+                  إعادة إرسال رمز التحقق
+                </button>
+              </form>
+            )}
+
+            {/* Footer Links */}
+            <div className="mt-8 pt-6 border-t-2 border-gray-100">
+              <p className="text-center text-xs text-gray-500 mb-3">
+                بتسجيل الدخول، أنت توافق على:
+              </p>
+              <div className="flex items-center justify-center gap-4 text-xs">
+                <Link 
+                  href="/terms" 
+                  className="text-emerald-600 hover:text-emerald-700 font-semibold hover:underline transition-colors"
+                >
+                  الشروط والأحكام
+                </Link>
+                <span className="text-gray-400">•</span>
+                <Link 
+                  href="/privacy" 
+                  className="text-emerald-600 hover:text-emerald-700 font-semibold hover:underline transition-colors"
+                >
+                  سياسة الخصوصية
+                </Link>
               </div>
-
-              <Button 
-                type="submit" 
-                className="w-full h-12 text-base font-medium bg-[#4C6A3E] hover:bg-[#3f5b33] text-white shadow-lg flex items-center justify-center gap-2"
-                disabled={loading || otp.length !== 6}
-              >
-                <LogIn className="w-5 h-5" />
-                {loading ? 'جارٍ التحقق...' : 'تسجيل الدخول'}
-              </Button>
-
-              <button
-                type="button"
-                onClick={handleEmailSubmit}
-                disabled={loading}
-                className="w-full text-[#4C6A3E] text-sm hover:underline disabled:opacity-50 font-medium"
-              >
-                إعادة إرسال رمز التحقق
-              </button>
-            </form>
-          )}
-
-          {/* Terms and Privacy Links */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-center text-xs text-gray-500 mb-2">
-              بتسجيل الدخول، أنت توافق على:
-            </p>
-            <div className="flex items-center justify-center gap-3 text-xs">
-              <Link to="/terms" className="text-[#4C6A3E] hover:text-[#3f5b33] font-medium hover:underline">
-                الشروط والأحكام
-              </Link>
-              <span className="text-gray-400">•</span>
-              <Link to="/privacy" className="text-[#4C6A3E] hover:text-[#3f5b33] font-medium hover:underline">
-                سياسة الخصوصية
-              </Link>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
